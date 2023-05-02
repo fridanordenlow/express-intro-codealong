@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import bodyParser from "body-parser";
+import data from './data.json'
 
 // Defines the port the app will run on. Defaults to 8080, but can be overridden
 // when starting the server. Example command to overwrite PORT env variable value:
@@ -9,12 +11,36 @@ const app = express();
 
 // Add middlewares to enable cors and json body parsing
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
+// app.use(express.json());
+
+
 
 // Start defining your routes here
 app.get("/", (req, res) => {
   res.send("Hello Technigo!");
 });
+
+app.get('/nominations', (request, response) => {
+  response.json(data)
+})
+
+app.get('/year/:year', (req, res) => {
+  const year = req.params.year
+  const showWinners = req.query.won
+  let nominationsFromYear = data.filter((item) => item.year_award === Number(year))
+  // Different ways to make the type of the data the same as the type of the variable
+  // year_award is a number, const year is a string
+  // let nominationsFromYear = data.filter((item) => item.year_award.toString() === year)
+  // let nominationsFromYear = data.filter((item) => item.year_award == year)
+  // let nominationsFromYear = data.filter((item) => item.year_award === +year)
+
+  if (showWinners) {
+    nominationsFromYear = nominationsFromYear.filter((item) => item.win)
+  }
+
+  res.json(nominationsFromYear)
+})
 
 // Start the server
 app.listen(port, () => {
